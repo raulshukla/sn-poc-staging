@@ -58,8 +58,6 @@ export default function GetInTouch() {
           <div>
             <Label className="text-[12px] px-3">What is this about?</Label>
             <Select
-              className="rounded-[24px] h-16 text-[14px] px-5 w-[420px]"
-              placeholder="Your Contact Email"
             >
               <SelectTrigger
                 className={cn(
@@ -80,8 +78,6 @@ export default function GetInTouch() {
           <div>
             <Label className="text-[12px] px-3">Select Class</Label>
             <Select
-              className="rounded-[24px] h-16 text-[14px] px-5 w-[420px]"
-              placeholder="Your Contact Email"
             >
               <SelectTrigger
                 className={cn(
@@ -100,8 +96,6 @@ export default function GetInTouch() {
           <div>
             <Label className="text-[12px] px-3">Select Exam</Label>
             <Select
-              className="rounded-[24px] h-16 text-[14px] px-5 w-[420px]"
-              placeholder="Your Contact Email"
             >
               <SelectTrigger
                 className={cn(
