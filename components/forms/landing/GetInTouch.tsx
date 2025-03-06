@@ -14,7 +14,7 @@ import React from "react";
 
 export default function GetInTouch() {
   return (
-    <div className="my-20 flex flex-row justify-between">
+    <div className="my-20 flex flex-row justify-between items-center">
       <div className="flex flex-col gap-6">
         <h1 className="text-[40px] font-bold leading-snug relative">
           Get in Touch with
