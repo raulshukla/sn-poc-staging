@@ -64,7 +64,7 @@ export default function GetInTouch() {
                   "rounded-[24px] h-16 text-[14px] px-5 w-[420px] text-gray-500"
                 )}
               >
-                <SelectValue placeholder="Select pronouns..." />
+                <SelectValue placeholder="What is this about?" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="1">1</SelectItem>
@@ -84,7 +84,7 @@ export default function GetInTouch() {
                   "rounded-[24px] h-16 text-[14px] px-5 w-[420px] text-gray-500"
                 )}
               >
-                <SelectValue placeholder="Select pronouns..." />
+                <SelectValue placeholder="Select Class..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="1">Class 1</SelectItem>
@@ -102,7 +102,7 @@ export default function GetInTouch() {
                   "rounded-[24px] h-16 text-[14px] px-5 w-[420px] text-gray-500"
                 )}
               >
-                <SelectValue placeholder="Select pronouns..." />
+                <SelectValue placeholder="Select Exam..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="1">Exam 1</SelectItem>
