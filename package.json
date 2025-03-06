@@ -4,6 +4,7 @@
   "version": "1.0.1",
   "description": "frontend for poc",
   "author": "sacredAST",
+  "packageManager": "pnpm@9.4.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
