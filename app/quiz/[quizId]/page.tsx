@@ -31,7 +31,7 @@ import {
   ScoreType,
   SolvedQuiz,
 } from "@/types/quiz";
-import ReactMarkDown from 'react-markdown';
+import ReactMarkDown from "react-markdown";
 
 export default function Page({ params }: { params: Promise<{ quizId: string }> }) {
   const [answeredQuiz, setAnsweredQuiz] = useState<SolvedQuiz[]>([]);
@@ -74,20 +74,18 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
 
     let _answeredQuiz: SolvedQuiz[] = [];
     Object.assign(_answeredQuiz, answeredQuiz);
-    // handle submit for reasoning.
 
     if (currentIndex < answeredQuiz.length) {
       try {
-        let reasoningQuiz = quizData[currentIndex];
-        const { data: response } = await api.post<ReasonRequest>("/quiz/get_reason", {
-          question: reasoningQuiz.question,
-          correctAnswer: reasoningQuiz.answers[reasoningQuiz.correctAnswer],
-          selectedAnswer:
-            reasoningQuiz.answers[_answeredQuiz[currentIndex].selectedAnswer],
-        });
-        _answeredQuiz[currentIndex].reason = response.reason;
-
         if (_answeredQuiz[currentIndex].isAnswered == false) {
+          let reasoningQuiz = quizData[currentIndex];
+          const { data: response } = await api.post<string>("/quiz/get_reason", {
+            question: reasoningQuiz.question,
+            correctAnswer: reasoningQuiz.answers[reasoningQuiz.correctAnswer],
+            selectedAnswer:
+              reasoningQuiz.answers[_answeredQuiz[currentIndex].selectedAnswer],
+          });
+          _answeredQuiz[currentIndex].reason = response;
           if (
             _answeredQuiz[currentIndex].correctAnswer ===
             _answeredQuiz[currentIndex].selectedAnswer
@@ -102,10 +100,10 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
               incorrects: scores.incorrects + 1,
             });
           }
+          _answeredQuiz[currentIndex].isAnswered = true;
+        } else {
+          setCurrentIndex(currentIndex + 1);
         }
-        _answeredQuiz[currentIndex].isAnswered = true;
-
-        setCurrentIndex(currentIndex + 1);
 
         setAnsweredQuiz(_answeredQuiz);
       } catch (ex) {
@@ -300,7 +298,7 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
                         onClick={() => handleNext()}
                         disabled={currentIndex > answeredQuiz.length}
                       >
-                        Next
+                        {currentIndex < answeredQuiz.length && answeredQuiz[currentIndex].isAnswered ? "Next" : "Submit"}
                         <ArrowRight />
                       </Button>
                     </div>
