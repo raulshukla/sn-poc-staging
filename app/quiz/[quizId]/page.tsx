@@ -25,14 +25,9 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
-import {
-  QuizType,
-  ReasonRequest,
-  ResponseData,
-  ScoreType,
-  SolvedQuiz,
-} from "@/types/quiz";
+import { QuizType, ResponseData, ScoreType, SolvedQuiz } from "@/types/quiz";
 import ReactMarkDown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 
 export default function Page({ params }: { params: Promise<{ quizId: string }> }) {
   const [answeredQuiz, setAnsweredQuiz] = useState<SolvedQuiz[]>([]);
@@ -79,13 +74,13 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
       try {
         if (_answeredQuiz[currentIndex].isAnswered == false) {
           let reasoningQuiz = quizData[currentIndex];
-          // const { data: response } = await api.post<string>("/quiz/get_reason", {
-          //   question: reasoningQuiz.question,
-          //   correctAnswer: reasoningQuiz.answers[reasoningQuiz.correctAnswer],
-          //   selectedAnswer:
-          //     reasoningQuiz.answers[_answeredQuiz[currentIndex].selectedAnswer],
-          // });
-          // _answeredQuiz[currentIndex].reason = response;
+          const { data: response } = await api.post<string>("/quiz/get_reason", {
+            question: reasoningQuiz.question,
+            correctAnswer: reasoningQuiz.answers[reasoningQuiz.correctAnswer],
+            selectedAnswer:
+              reasoningQuiz.answers[_answeredQuiz[currentIndex].selectedAnswer],
+          });
+          _answeredQuiz[currentIndex].reason = response;
           if (
             _answeredQuiz[currentIndex].correctAnswer ===
             _answeredQuiz[currentIndex].selectedAnswer
@@ -232,7 +227,13 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
                           </SelectContent>
                         </Select>{" "}
                         <div className="flex flex-row gap-6 text-[12px] font-[500]">
-                          <p>Attempt: {currentIndex < answeredQuiz.length ? answeredQuiz[currentIndex].attempts : 0}/40</p>
+                          <p>
+                            Attempt:{" "}
+                            {currentIndex < answeredQuiz.length
+                              ? answeredQuiz[currentIndex].attempts
+                              : 0}
+                            /40
+                          </p>
                           <div className="flex flex-row gap-1">
                             <Check className="bg-[#2ECC71] text-white rounded-full w-4 h-4 border-[#2ECC71] border-2" />
                             Correct: {scores.corrects}
@@ -247,7 +248,7 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
                         <div className="absolute w-full bg-[#F5F5F5] h-[6px] rounded-full overflow-hidden">
                           <div
                             className={cn("bg-primary rounded-full h-[6px] w-full")}
-                            style={{ width: `${((currentIndex / 14) * 100)}%` }}
+                            style={{ width: `${(currentIndex / 14) * 100}%` }}
                           ></div>
                         </div>
                         {quizData.map((quiz: QuizType, index: number) =>
@@ -368,7 +369,9 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
                     answeredQuiz[currentIndex].isAnswered && (
                       <div className="shadow-xl rounded-[8px] relative overflow-hidden flex flex-col p-6 gap-6 justify-between">
                         <div className="bg-primary h-1 rounded-[2px] absolute top-0 left-0 w-full"></div>
-                        <ReactMarkDown>{answeredQuiz[currentIndex].reason}</ReactMarkDown>
+                        <ReactMarkDown rehypePlugins={[rehypeRaw]}>
+                          {answeredQuiz[currentIndex].reason}
+                        </ReactMarkDown>
                       </div>
                     )}
                 </div>
