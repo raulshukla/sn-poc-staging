@@ -1,7 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { use, useCallback, useEffect, useState } from "react";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,12 +11,10 @@ import {
   Circle,
   EllipsisVertical,
   Lightbulb,
-  SendIcon,
   X,
 } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import ChatInput, { AIMessage, ChatProps, UserMessage } from "@/components/chat/chat";
+import ChatInput from "@/components/chat/chat";
+import { useRouter } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -26,136 +23,147 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-
-let quizScores = [
-  {
-    quizId: 1,
-    isAnswered: true,
-    isCorrect: true,
-  },
-  {
-    quizId: 2,
-    isAnswered: true,
-    isCorrect: false,
-  },
-  {
-    quizId: 3,
-    isAnswered: true,
-    isCorrect: true,
-  },
-  {
-    quizId: 4,
-    isAnswered: true,
-    isCorrect: false,
-  },
-  {
-    quizId: 5,
-    isAnswered: true,
-    isCorrect: true,
-  },
-  {
-    quizId: 6,
-    isAnswered: false,
-    isCorrect: false,
-  },
-  {
-    quizId: 7,
-    isAnswered: false,
-    isCorrect: false,
-  },
-  {
-    quizId: 8,
-    isAnswered: false,
-    isCorrect: false,
-  },
-  {
-    quizId: 9,
-    isAnswered: false,
-    isCorrect: false,
-  },
-  {
-    quizId: 10,
-    isAnswered: false,
-    isCorrect: false,
-  },
-  {
-    quizId: 11,
-    isAnswered: false,
-    isCorrect: false,
-  },
-  {
-    quizId: 12,
-    isAnswered: false,
-    isCorrect: false,
-  },
-  {
-    quizId: 13,
-    isAnswered: false,
-    isCorrect: false,
-  },
-  {
-    quizId: 14,
-    isAnswered: false,
-    isCorrect: false,
-  },
-  {
-    quizId: 15,
-    isAnswered: false,
-    isCorrect: false,
-  },
-];
+import { api } from "@/lib/api";
+import {
+  QuizType,
+  ReasonRequest,
+  ResponseData,
+  ScoreType,
+  SolvedQuiz,
+} from "@/types/quiz";
+import ReactMarkDown from 'react-markdown';
 
 export default function Page({ params }: { params: Promise<{ quizId: string }> }) {
-  const searchParams = useSearchParams();
+  const [answeredQuiz, setAnsweredQuiz] = useState<SolvedQuiz[]>([]);
+  const [scores, setScores] = useState<ScoreType>({
+    corrects: 0,
+    incorrects: 0,
+  });
+  const [quizTitle, setQuizTitle] = useState("");
+  const [quizData, setQuizData] = useState<QuizType[]>([]);
+  const [isStart, setIsStart] = useState(false);
 
-  // Get the status from api - Update later
-  const [currentIndex, setCurrentIndex] = useState(5);
+  const router = useRouter();
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const [messages, setMessages] = useState<ChatProps[]>([]);
+  const [isOpen, SetIsOpen] = useState(false);
 
   const { quizId } = use(params);
 
-  const type = searchParams.get("type");
+  const getQuiz = useCallback(async () => {
+    try {
+      const { data: response } = await api.post<ResponseData>("/quiz/get_quiz_by_id", {
+        courseId: quizId,
+      });
+      setQuizData(response.questions);
+      setQuizTitle(response.title);
+      console.log(response);
+    } catch (ex) {
+      console.log(ex);
+    }
+  }, [quizId]);
 
   useEffect(() => {
-    console.log(quizId);
-    console.log(type);
+    getQuiz();
   }, []);
 
-  return currentIndex == 0 ? (
+  const handleNext = async () => {
+    if (currentIndex == 14) {
+      router.push(`/quiz/${quizId}/result`);
+    }
+
+    let _answeredQuiz: SolvedQuiz[] = [];
+    Object.assign(_answeredQuiz, answeredQuiz);
+    // handle submit for reasoning.
+
+    if (currentIndex < answeredQuiz.length) {
+      try {
+        let reasoningQuiz = quizData[currentIndex];
+        const { data: response } = await api.post<ReasonRequest>("/quiz/get_reason", {
+          question: reasoningQuiz.question,
+          correctAnswer: reasoningQuiz.answers[reasoningQuiz.correctAnswer],
+          selectedAnswer:
+            reasoningQuiz.answers[_answeredQuiz[currentIndex].selectedAnswer],
+        });
+        _answeredQuiz[currentIndex].reason = response.reason;
+
+        if (_answeredQuiz[currentIndex].isAnswered == false) {
+          if (
+            _answeredQuiz[currentIndex].correctAnswer ===
+            _answeredQuiz[currentIndex].selectedAnswer
+          ) {
+            setScores({
+              ...scores,
+              corrects: scores.corrects + 1,
+            });
+          } else {
+            setScores({
+              ...scores,
+              incorrects: scores.incorrects + 1,
+            });
+          }
+        }
+        _answeredQuiz[currentIndex].isAnswered = true;
+
+        setCurrentIndex(currentIndex + 1);
+
+        setAnsweredQuiz(_answeredQuiz);
+      } catch (ex) {
+        console.log(ex);
+      }
+    }
+  };
+
+  const handleSelectAnswer = (index: number) => {
+    let _answeredQuiz: SolvedQuiz[] = [];
+    Object.assign(_answeredQuiz, answeredQuiz);
+    if (answeredQuiz.length <= currentIndex) {
+      let newData: SolvedQuiz = {
+        quizId: currentIndex,
+        correctAnswer: quizData[currentIndex].correctAnswer,
+        selectedAnswer: index,
+        reason: "",
+        isAnswered: false,
+        attempts: 0,
+      };
+      setAnsweredQuiz([...answeredQuiz, newData]);
+    } else {
+      if (_answeredQuiz[currentIndex].isAnswered == false)
+        _answeredQuiz[currentIndex] = {
+          quizId: currentIndex,
+          correctAnswer: quizData[currentIndex].correctAnswer,
+          selectedAnswer: index,
+          reason: "",
+          isAnswered: false,
+          attempts: _answeredQuiz[currentIndex].attempts + 1,
+        };
+
+      console.log(_answeredQuiz[currentIndex]);
+      setAnsweredQuiz(_answeredQuiz);
+    }
+  };
+
+  return !isStart ? (
     <div className={`w-full h-full max-h-full flex flex-col justify-between`}>
       <div className="flex-grow h-full bg-white">
         <div className="flex flex-col h-full justify-center items-center py-3 gap-12">
           <div className="flex flex-col gap-2 text-center">
             <h4 className="text-[18px] font-bold">Progress Quiz</h4>
-            <h1 className="text-[40px] font-bold text-primary">
-              Intro to Law and Ethics
-            </h1>
+            <h1 className="text-[40px] font-bold text-primary">{quizTitle}</h1>
           </div>
           <img
             src="/assets/images/quiz_1.png"
             alt=""
             className="w-[640px] h-[360px] object-cover rounded-[24px]"
           />
-          <Button className="h-[56px] text-[14px] font-[500] rounded-[8px] px-6 w-[200px]">
+          <Button
+            className="h-[56px] text-[14px] font-[500] rounded-[8px] px-6 w-[200px]"
+            onClick={() => setIsStart(quizData.length > 0)}
+          >
             Start Quiz
             <ArrowRight />
           </Button>
         </div>
-      </div>
-      <div className="bg-white bottom-0 w-full flex flex-row justify-between gap-4 p-6 items-end border-t">
-        <div className="w-full">
-          <Label className="text-[12px] px-3">
-            Ask a question or provide a prompt...
-          </Label>
-          <Input
-            className="rounded-[24px] h-[59px] text-[14px] px-5"
-            placeholder="Type here..."
-          />
-        </div>
-        <Button className="h-[59px] rounded-[12px] px-6 w-[126px] text-[14px]">
-          Submit <SendIcon />
-        </Button>
       </div>
     </div>
   ) : (
@@ -163,17 +171,12 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
       <div
         className={cn(
           `h-full max-h-full flex justify-between`,
-          messages.length > 0 ? "flex-row" : "flex-col"
+          isOpen ? "flex-row" : "flex-col"
         )}
       >
-        <div className={cn("flex-grow", messages.length > 0 ? "h-full" : "h-0")}>
+        <div className={cn("flex-grow", isOpen ? "h-full" : "h-0")}>
           <div className="flex flex-col h-full bg-white justify-start">
-            <div
-              className={cn(
-                "flex-grow overflow-hidden",
-                messages.length > 0 ? "h-0" : "h-full"
-              )}
-            >
+            <div className={cn("flex-grow overflow-hidden", isOpen ? "h-0" : "h-full")}>
               <PerfectScrollbar
                 options={{ suppressScrollX: true }}
                 style={{ paddingRight: 0 }}
@@ -183,13 +186,12 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
                     <Button
                       variant="secondary"
                       className="h-9 rounded-[8px] px-3 text-[12px] font-[500]"
+                      onClick={() => router.push(`/course/${quizId}`)}
                     >
                       <ChevronLeft />
                       Back to Class
                     </Button>
-                    <h1 className="text-[20px] font-bold">
-                      Progress Quiz - Intro to Law and Ethics
-                    </h1>
+                    <h1 className="text-[20px] font-bold">Progress Quiz - {quizTitle}</h1>
                     <div className="flex flex-row gap-2">
                       <Button
                         variant="secondary"
@@ -226,20 +228,22 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
                               <SelectValue placeholder="Questions" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="1">1</SelectItem>
-                              <SelectItem value="2">2</SelectItem>
-                              <SelectItem value="3">3</SelectItem>
+                              {quizData.map((q: QuizType, index: number) => (
+                                <SelectItem value="1" key={index}>
+                                  Question {index + 1}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>{" "}
                           <p>Attempt: 3/40</p>
                         </div>
                         <div className="flex flex-row gap-1 text-[12px] font-[500]">
                           <Check className="bg-[#2ECC71] text-white rounded-full w-4 h-4 border-[#2ECC71] border-2" />
-                          Correct: 2
+                          Correct: {scores.corrects}
                         </div>
                         <div className="flex flex-row gap-1 text-[12px] font-[500]">
                           <X className="bg-[#E74C3C] text-white rounded-full w-4 h-4 border-[#E74C3C] border-2" />
-                          Incorrect: 1
+                          Incorrect: {scores.incorrects}
                         </div>
                       </div>
                       <div className="flex flex-row gap-0.5 justify-between items-center relative">
@@ -249,32 +253,33 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
                             style={{ width: `${Math.round((currentIndex / 15) * 100)}%` }}
                           ></div>
                         </div>
-                        {quizScores.map((quiz) =>
-                          quiz.quizId == currentIndex ? (
+                        {quizData.map((quiz: QuizType, index: number) =>
+                          index == currentIndex ? (
                             <div
-                              key={quiz.quizId}
+                              key={index}
                               className="bg-[#FFE5E5] z-10 w-[30px] h-[30px] rounded-full p-1.5 text-center border-[0.47px] border-primary text-primary text-[12px] font-[500]"
                             >
-                              {quiz.quizId}
+                              {index + 1}
                             </div>
-                          ) : quiz.isAnswered ? (
-                            quiz.isCorrect ? (
+                          ) : index < answeredQuiz.length ? (
+                            answeredQuiz[index].correctAnswer ==
+                            answeredQuiz[index].selectedAnswer ? (
                               <Check
-                                key={quiz.quizId}
+                                key={index}
                                 className="bg-[#2ECC71] z-10 text-white rounded-full w-5 h-5 border-[#2ECC71] border-2"
                               />
                             ) : (
                               <X
-                                key={quiz.quizId}
+                                key={index}
                                 className="bg-[#E74C3C] z-10 text-white rounded-full w-5 h-5 border-[#E74C3C] border-2"
                               />
                             )
                           ) : (
                             <div
-                              key={quiz.quizId}
+                              key={index}
                               className="bg-[#F5F5F5] z-10 w-5 h-5 rounded-full flex justify-center items-center text-center border-[0.47px] border-[#DDDDDD] text-[#B1B1B1] text-[9.8px] font-[500]"
                             >
-                              <p>{quiz.quizId}</p>
+                              <p>{index + 1}</p>
                             </div>
                           )
                         )}
@@ -284,11 +289,17 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
                       <Button
                         variant="secondary"
                         className="bg-white border h-14 rounded-[12px] w-[200px] text-[14px] font-[500]"
+                        onClick={() => setCurrentIndex(currentIndex - 1)}
+                        disabled={currentIndex == 0}
                       >
                         <ArrowLeft />
-                        Back to Class
+                        Previous
                       </Button>
-                      <Button className="h-14 rounded-[12px] w-[200px] text-[14px] font-[500]">
+                      <Button
+                        className="h-14 rounded-[12px] w-[200px] text-[14px] font-[500]"
+                        onClick={() => handleNext()}
+                        disabled={currentIndex > answeredQuiz.length}
+                      >
                         Next
                         <ArrowRight />
                       </Button>
@@ -298,37 +309,52 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
                     <div className="bg-primary h-1 rounded-[2px] absolute top-0 left-0 w-full"></div>
                     <div className="flex flex-col gap-2 justify-between">
                       <h4 className="text-primary font-bold text-[18px]">
-                        The Environmental Protection Agency (EPA) has established rules
-                        limiting emissions of pollutants like carbon dioxide, sulfur
-                        dioxide, and nitrogen oxides from power plants. The EPA's power to
-                        make these rules was delegated by ______________, and
-                        ______________ governs how these rules are made and challenged.
+                        {quizData[currentIndex].question}
                       </h4>
                       <p className="text-[14px] font-[500]">
                         Tap/click, or type A-E in the field below.
                       </p>
                     </div>
-                    <img
+                    {/* <img
                       src="/assets/images/quiz_question_1.png"
                       alt=""
                       className="border-[#DDDDDD] border-1 rounded-[16px] max-w-3xl self-center"
-                    />
+                    /> */}
                     <div className="flex flex-col justify-between gap-2">
-                      <div className="cursor-pointer transition-all border-black hover:border-primary border-[1px] hover:bg-primary hover:text-white flex flex-row justify-between px-5 py-4 rounded-[12px]">
-                        <p>a.) The President; the restatement of the law.</p>
-                        <Circle />
-                      </div>
+                      {quizData[currentIndex].answers.map(
+                        (answer: string, index: number) => (
+                          <div
+                            key={index}
+                            className={cn(
+                              "cursor-pointer transition-all border-black hover:border-primary border-[1px] hover:bg-primary hover:text-white flex flex-row justify-between px-5 py-4 rounded-[12px]",
+                              currentIndex < answeredQuiz.length &&
+                                answeredQuiz[currentIndex].selectedAnswer == index &&
+                                "bg-primary border-none text-secondary"
+                            )}
+                            onClick={() => handleSelectAnswer(index)}
+                          >
+                            <p>
+                              {String.fromCharCode(index + 65)}.) {answer}.
+                            </p>
+                            <Circle />
+                          </div>
+                        )
+                      )}
                     </div>
                   </div>
-                  <div className="shadow-xl rounded-[8px] relative overflow-hidden flex flex-col p-6 gap-6 justify-between">
-                    <div className="bg-primary h-1 rounded-[2px] absolute top-0 left-0 w-full"></div>
-                  </div>
+                  {currentIndex < answeredQuiz.length &&
+                    answeredQuiz[currentIndex].isAnswered && (
+                      <div className="shadow-xl rounded-[8px] relative overflow-hidden flex flex-col p-6 gap-6 justify-between">
+                        <div className="bg-primary h-1 rounded-[2px] absolute top-0 left-0 w-full"></div>
+                        <ReactMarkDown>{answeredQuiz[currentIndex].reason}</ReactMarkDown>
+                      </div>
+                    )}
                 </div>
               </PerfectScrollbar>
             </div>
           </div>
         </div>
-        <ChatInput messages={messages} setMessages={setMessages} />
+        <ChatInput isOpen={isOpen} SetIsOpen={SetIsOpen} />
       </div>
     </div>
   );

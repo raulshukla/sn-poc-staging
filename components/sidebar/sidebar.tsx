@@ -20,6 +20,7 @@ export default function SideBar() {
   ]);
 
   const [isGenAI, setIsGenAI] = useState<boolean>(true);
+  const [content, setContent] = useState<"Concise" | "Main" | "Full">("Full");
   const [isContent, setIsContent] = useState<boolean>(true);
 
   const handleValueChange = (values: string[]) => {
@@ -33,13 +34,29 @@ export default function SideBar() {
         <Label className="text-[20px] font-bold">Generative AI</Label>
         <Toggle checked={isGenAI} onCheckedChange={setIsGenAI} />
       </div>
-      <div className="flex flex-row justify-between items-center pr-3">
+      <div className="flex flex-col justify-between pr-3">
         <Label className="text-[20px] font-bold">Content</Label>
-        <Toggle
-          checked={isContent}
-          onCheckedChange={setIsContent}
-          labels={["Concise", "Full"]}
-        />
+        <div
+          className={cn(
+            "relative flex flex-row justify-evenly cursor-pointer transition-all h-9 rounded-full border p-0.5 min-w-16 text-[12px] font-[400] text-[#333333] border-primary"
+          )}
+        >
+          {["Concise", "Main", "Full"].map((text) => (
+            <div
+              className={cn(
+                "h-full rounded-full contain-content flex justify-center items-center px-4 w-full",
+                content == text && "bg-primary text-secondary"
+              )}
+              key={text}
+              onClick={() =>
+                (text == "Concise" || text == "Main" || text == "Full") &&
+                setContent(text)
+              }
+            >
+              <p>{text}</p>
+            </div>
+          ))}
+        </div>
       </div>
       <div className="overflow-hidden h-0 flex flex-grow">
         <PerfectScrollbar
@@ -123,17 +140,22 @@ export default function SideBar() {
               <AccordionItem value="study-guides">
                 <AccordionTrigger
                   className={cn(
-                    "font-medium",
+                    "font-medium flex-col justify-between gap-2 py-2",
                     openItems.includes("study-guides") && "text-primary"
                   )}
                 >
-                  <div className="flex flex-row justify-between w-full pr-5">
-                    <h3 className="text-[16px] font-[500]">Study Guides</h3>
-                    <p className="text-[16px] font-[500]">
-                      70<span className="text-[12px] font-[400]">%</span>
-                    </p>
+                  <div className="flex flex-row justify-between w-full">
+                    <div className="flex flex-row justify-between w-full pr-5">
+                      <h3 className="text-[16px] font-[500]">Study Guides</h3>
+                      <p className="text-[16px] font-[500]">
+                        70<span className="text-[12px] font-[400]">%</span>
+                      </p>
+                    </div>
+                    {openItems.includes("study-guides") ? <MinusIcon /> : <PlusIcon />}
                   </div>
-                  {openItems.includes("study-guides") ? <MinusIcon /> : <PlusIcon />}
+                  <div className="w-full bg-[#ddd] h-2 rounded-full">
+                    <div className="w-[70%] bg-primary h-2 rounded-full"></div>
+                  </div>
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="flex flex-col gap-1">
@@ -161,17 +183,22 @@ export default function SideBar() {
               <AccordionItem value="practice-exams">
                 <AccordionTrigger
                   className={cn(
-                    "font-medium",
+                    "font-medium flex-col justify-between gap-2 py-2",
                     openItems.includes("practice-exams") && "text-primary"
                   )}
                 >
-                  <div className="flex flex-row justify-between w-full pr-5">
-                    <h3 className="text-[16px] font-[500]">Practice Exams</h3>
-                    <p className="text-[16px] font-[500]">
-                      1<span className="text-[12px] font-[400]">/3</span>
-                    </p>
+                  <div className="flex flex-row justify-between w-full">
+                    <div className="flex flex-row justify-between w-full pr-5">
+                      <h3 className="text-[16px] font-[500]">Practice Exams</h3>
+                      <p className="text-[16px] font-[500]">
+                        1<span className="text-[12px] font-[400]">/3</span>
+                      </p>
+                    </div>
+                    {openItems.includes("practice-exams") ? <MinusIcon /> : <PlusIcon />}
                   </div>
-                  {openItems.includes("practice-exams") ? <MinusIcon /> : <PlusIcon />}
+                  <div className="w-full bg-[#ddd] h-2 rounded-full">
+                    <div className="w-[33%] bg-primary h-2 rounded-full"></div>
+                  </div>
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="flex flex-col gap-1">
@@ -199,17 +226,22 @@ export default function SideBar() {
               <AccordionItem value="flash-cards">
                 <AccordionTrigger
                   className={cn(
-                    "font-medium",
+                    "font-medium flex-col justify-between gap-2 py-2",
                     openItems.includes("flash-cards") && "text-primary"
                   )}
                 >
-                  <div className="flex flex-row justify-between w-full pr-5">
-                    <h3 className="text-[16px] font-[500]">Flashcards</h3>
-                    <p className="text-[16px] font-[500]">
-                      17<span className="text-[12px] font-[400]">/34</span>
-                    </p>
+                  <div className="flex flex-row justify-between w-full">
+                    <div className="flex flex-row justify-between w-full pr-5">
+                      <h3 className="text-[16px] font-[500]">Flashcards</h3>
+                      <p className="text-[16px] font-[500]">
+                        17<span className="text-[12px] font-[400]">/34</span>
+                      </p>
+                    </div>
+                    {openItems.includes("flash-cards") ? <MinusIcon /> : <PlusIcon />}
                   </div>
-                  {openItems.includes("flash-cards") ? <MinusIcon /> : <PlusIcon />}
+                  <div className="w-full bg-[#ddd] h-2 rounded-full">
+                    <div className="w-[50%] bg-primary h-2 rounded-full"></div>
+                  </div>
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="flex flex-col gap-1">
