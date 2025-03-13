@@ -8,6 +8,8 @@ import { api } from "@/lib/api";
 import ChatInput from "@/components/chat/chat";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from 'rehype-raw';
+
 
 type ResponseData = {
   id: string;
@@ -135,7 +137,7 @@ export default function Page({ params }: { params: Promise<{ courseId: string }>
                       <div className="relative flex bg-white rounded-[8px] overflow-hidden w-full">
                         <div className="absolute top-0 left-0 h-1 w-full rounded-[2px] bg-primary"></div>
                         <div className="p-6">
-                          <ReactMarkdown>{courseInfo.description}</ReactMarkdown>
+                          <ReactMarkdown rehypePlugins={[rehypeRaw]}>{courseInfo.description}</ReactMarkdown>
                         </div>
                       </div>
                       <div className="h-1 w-full rounded-[2px] bg-primary"></div>
