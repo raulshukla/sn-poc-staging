@@ -9,6 +9,7 @@ import {
   Check,
   ChevronLeft,
   Circle,
+  CircleX,
   EllipsisVertical,
   Lightbulb,
   X,
@@ -298,7 +299,10 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
                         onClick={() => handleNext()}
                         disabled={currentIndex > answeredQuiz.length}
                       >
-                        {currentIndex < answeredQuiz.length && answeredQuiz[currentIndex].isAnswered ? "Next" : "Submit"}
+                        {currentIndex < answeredQuiz.length &&
+                        answeredQuiz[currentIndex].isAnswered
+                          ? "Next"
+                          : "Submit"}
                         <ArrowRight />
                       </Button>
                     </div>
@@ -326,15 +330,37 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
                             className={cn(
                               "cursor-pointer transition-all border-black hover:border-primary border-[1px] hover:bg-primary hover:text-white flex flex-row justify-between px-5 py-4 rounded-[12px]",
                               currentIndex < answeredQuiz.length &&
+                                answeredQuiz[currentIndex].isAnswered &&
+                                answeredQuiz[currentIndex].correctAnswer == index &&
+                                "border-[#2ECC71] text-[#2ECC71]",
+                              currentIndex < answeredQuiz.length &&
                                 answeredQuiz[currentIndex].selectedAnswer == index &&
-                                "bg-primary border-none text-secondary"
+                                "bg-primary border-primary text-secondary",
+                              currentIndex < answeredQuiz.length &&
+                                answeredQuiz[currentIndex].isAnswered &&
+                                answeredQuiz[currentIndex].selectedAnswer == index
+                                ? answeredQuiz[currentIndex].correctAnswer == index
+                                  ? "bg-[#2ECC71] border-[#2ECC71] text-secondary"
+                                  : "bg-primary border-primary text-secondary"
+                                : ""
                             )}
                             onClick={() => handleSelectAnswer(index)}
                           >
                             <p>
                               {String.fromCharCode(index + 65)}.) {answer}.
                             </p>
-                            <Circle />
+                            {currentIndex < answeredQuiz.length &&
+                            answeredQuiz[currentIndex].isAnswered ? (
+                              answeredQuiz[currentIndex].correctAnswer == index ? (
+                                <Check />
+                              ) : answeredQuiz[currentIndex].selectedAnswer == index ? (
+                                <CircleX />
+                              ) : (
+                                <Circle />
+                              )
+                            ) : (
+                              <Circle />
+                            )}
                           </div>
                         )
                       )}
