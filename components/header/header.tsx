@@ -1,7 +1,7 @@
 import { Button } from "../ui/button";
 
 export const Header = () => (
-  <div className="flex flex-row w-full justify-between px-16 py-2 rounded-md shadow-md z-50 sticky items-center bg-white">
+  <div className="flex flex-row w-full justify-between px-16 py-2 rounded-md border-b z-50 sticky items-center bg-white">
       <div className="flex flex-row gap-8">
         <img src="/assets/images/logo.png" alt="" className="h-8" />
         <div className="h-8 flex flex-row justify-center items-center gap-2 bg-slate-100 rounded-full px-3">
