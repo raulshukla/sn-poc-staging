@@ -12,6 +12,7 @@ import {
   CircleX,
   EllipsisVertical,
   Lightbulb,
+  LoaderCircle,
   X,
 } from "lucide-react";
 import ChatInput from "@/components/chat/chat";
@@ -28,6 +29,7 @@ import { api } from "@/lib/api";
 import { QuizType, ResponseData, ScoreType, SolvedQuiz } from "@/types/quiz";
 import ReactMarkDown from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import { toast } from "sonner";
 
 export default function Page({ params }: { params: Promise<{ quizId: string }> }) {
   const [answeredQuiz, setAnsweredQuiz] = useState<SolvedQuiz[]>([]);
@@ -38,6 +40,7 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
   const [quizTitle, setQuizTitle] = useState("");
   const [quizData, setQuizData] = useState<QuizType[]>([]);
   const [isStart, setIsStart] = useState(false);
+  const [isSubmit, setIsSubmit] = useState(false);
 
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -74,12 +77,17 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
       try {
         if (_answeredQuiz[currentIndex].isAnswered == false) {
           let reasoningQuiz = quizData[currentIndex];
+          toast.success("Submitting...");
+          setIsSubmit(true);
           const { data: response } = await api.post<string>("/quiz/get_reason", {
             question: reasoningQuiz.question,
             correctAnswer: reasoningQuiz.answers[reasoningQuiz.correctAnswer],
             selectedAnswer:
               reasoningQuiz.answers[_answeredQuiz[currentIndex].selectedAnswer],
           });
+          toast.success("Submitted...");
+
+          setIsSubmit(false);
           _answeredQuiz[currentIndex].reason = response;
           if (
             _answeredQuiz[currentIndex].correctAnswer ===
@@ -103,6 +111,9 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
         setAnsweredQuiz(_answeredQuiz);
       } catch (ex) {
         console.log(ex);
+        setIsSubmit(false);
+        toast.error("Error on server");
+
       }
     }
   };
@@ -294,15 +305,23 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
                         Previous
                       </Button>
                       <Button
-                        className="h-14 rounded-[12px] w-[200px] text-[14px] font-[500]"
+                        className={cn(
+                          "h-14 rounded-[12px] w-[200px] text-[14px] font-[500]"
+                        )}
                         onClick={() => handleNext()}
                         disabled={currentIndex > answeredQuiz.length}
                       >
                         {currentIndex < answeredQuiz.length &&
                         answeredQuiz[currentIndex].isAnswered
                           ? "Next"
+                          : isSubmit
+                          ? "Submitting..."
                           : "Submit"}
-                        <ArrowRight />
+                        {isSubmit ? (
+                          <LoaderCircle className="animate-spin" />
+                        ) : (
+                          <ArrowRight />
+                        )}
                       </Button>
                     </div>
                   </div>
