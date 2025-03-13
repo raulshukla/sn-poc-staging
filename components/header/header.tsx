@@ -1,9 +1,19 @@
+"use client"
 import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
 
-export const Header = () => (
-  <div className="flex flex-row w-full justify-between px-16 py-2 rounded-md border-b z-50 sticky items-center bg-white">
+export const Header = () => {
+  const router = useRouter();
+
+  return (
+    <div className="flex flex-row w-full justify-between px-16 py-2 rounded-md border-b z-50 sticky items-center bg-white">
       <div className="flex flex-row gap-8">
-        <img src="/assets/images/logo.png" alt="" className="h-8" />
+        <img
+          src="/assets/images/logo.png"
+          alt=""
+          className="h-8 cursor-pointer"
+          onClick={() => router.push('/')}
+        />
         <div className="h-8 flex flex-row justify-center items-center gap-2 bg-slate-100 rounded-full px-3">
           <div className="h-2 w-2 rounded-full bg-[#00ff00]" />
           <span className="text-red-500">{784}</span> Members Online
@@ -24,6 +34,7 @@ export const Header = () => (
         </div>
       </div>
     </div>
-);
+  );
+};
 
 Header.displayName = "Header";

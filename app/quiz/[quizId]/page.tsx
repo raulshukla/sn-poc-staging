@@ -58,7 +58,6 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
       });
       setQuizData(response.questions);
       setQuizTitle(response.title);
-      console.log(response);
     } catch (ex) {
       console.log(ex);
     }
@@ -80,13 +79,13 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
       try {
         if (_answeredQuiz[currentIndex].isAnswered == false) {
           let reasoningQuiz = quizData[currentIndex];
-          const { data: response } = await api.post<string>("/quiz/get_reason", {
-            question: reasoningQuiz.question,
-            correctAnswer: reasoningQuiz.answers[reasoningQuiz.correctAnswer],
-            selectedAnswer:
-              reasoningQuiz.answers[_answeredQuiz[currentIndex].selectedAnswer],
-          });
-          _answeredQuiz[currentIndex].reason = response;
+          // const { data: response } = await api.post<string>("/quiz/get_reason", {
+          //   question: reasoningQuiz.question,
+          //   correctAnswer: reasoningQuiz.answers[reasoningQuiz.correctAnswer],
+          //   selectedAnswer:
+          //     reasoningQuiz.answers[_answeredQuiz[currentIndex].selectedAnswer],
+          // });
+          // _answeredQuiz[currentIndex].reason = response;
           if (
             _answeredQuiz[currentIndex].correctAnswer ===
             _answeredQuiz[currentIndex].selectedAnswer
@@ -123,7 +122,7 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
         selectedAnswer: index,
         reason: "",
         isAnswered: false,
-        attempts: 0,
+        attempts: 1,
       };
       setAnsweredQuiz([...answeredQuiz, newData]);
     } else {
@@ -137,7 +136,6 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
           attempts: _answeredQuiz[currentIndex].attempts + 1,
         };
 
-      console.log(_answeredQuiz[currentIndex]);
       setAnsweredQuiz(_answeredQuiz);
     }
   };
@@ -215,41 +213,41 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
                     </div>
                   </div>
                   <div className="flex flex-row gap-6 justify-between">
-                    <div className="flex flex-col py-1 justify-between">
-                      <div className="flex flex-row gap-6 items-center">
-                        <div className="text-[12px] font-[500] flex flex-row justify-center items-center">
-                          <Select>
-                            <SelectTrigger
-                              className={cn(
-                                "px-2 outline-none border-none shadow-none focus:ring-0 text-[12px] font-[500 ] w-[120px]"
-                              )}
-                            >
-                              <SelectValue placeholder="Questions" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {quizData.map((q: QuizType, index: number) => (
-                                <SelectItem value="1" key={index}>
-                                  Question {index + 1}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>{" "}
-                          <p>Attempt: 3/40</p>
-                        </div>
-                        <div className="flex flex-row gap-1 text-[12px] font-[500]">
-                          <Check className="bg-[#2ECC71] text-white rounded-full w-4 h-4 border-[#2ECC71] border-2" />
-                          Correct: {scores.corrects}
-                        </div>
-                        <div className="flex flex-row gap-1 text-[12px] font-[500]">
-                          <X className="bg-[#E74C3C] text-white rounded-full w-4 h-4 border-[#E74C3C] border-2" />
-                          Incorrect: {scores.incorrects}
+                    <div className="flex flex-col py-1 w-full justify-between">
+                      <div className="flex flex-row w-full justify-between gap-6 items-center">
+                        <Select>
+                          <SelectTrigger
+                            className={cn(
+                              "px-2 outline-none border-none shadow-none focus:ring-0 text-[12px] font-[500 ] w-[120px]"
+                            )}
+                          >
+                            <SelectValue placeholder="Questions" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {quizData.map((q: QuizType, index: number) => (
+                              <SelectItem value="1" key={index}>
+                                Question {index + 1}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>{" "}
+                        <div className="flex flex-row gap-6 text-[12px] font-[500]">
+                          <p>Attempt: {currentIndex < answeredQuiz.length ? answeredQuiz[currentIndex].attempts : 0}/40</p>
+                          <div className="flex flex-row gap-1">
+                            <Check className="bg-[#2ECC71] text-white rounded-full w-4 h-4 border-[#2ECC71] border-2" />
+                            Correct: {scores.corrects}
+                          </div>
+                          <div className="flex flex-row gap-1">
+                            <X className="bg-[#E74C3C] text-white rounded-full w-4 h-4 border-[#E74C3C] border-2" />
+                            Incorrect: {scores.incorrects}
+                          </div>
                         </div>
                       </div>
                       <div className="flex flex-row gap-0.5 justify-between items-center relative">
                         <div className="absolute w-full bg-[#F5F5F5] h-[6px] rounded-full overflow-hidden">
                           <div
-                            className={cn("bg-primary rounded-full h-[6px]")}
-                            style={{ width: `${Math.round((currentIndex / 15) * 100)}%` }}
+                            className={cn("bg-primary rounded-full h-[6px] w-full")}
+                            style={{ width: `${((currentIndex / 14) * 100)}%` }}
                           ></div>
                         </div>
                         {quizData.map((quiz: QuizType, index: number) =>
