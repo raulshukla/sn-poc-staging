@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import type { Metadata } from "next";
 import SideBar from "@/components/sidebar/sidebar";
 import { Header } from "@/components/header/header";
+import './global.css';
 import ChatInput from "@/components/chat/chat";
 const inter = Inter({ subsets: ["latin"] });
 
