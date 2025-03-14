@@ -3,13 +3,15 @@ import { use, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Circle, CircleX } from "lucide-react";
 import { api } from "@/lib/api";
 import ChatInput from "@/components/chat/chat";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
-import rehypeRaw from 'rehype-raw';
-
+import rehypeRaw from "rehype-raw";
+import { QuizType, SolvedQuiz } from "@/types/quiz";
+import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 type ResponseData = {
   id: string;
@@ -20,7 +22,10 @@ type ResponseData = {
 };
 
 export default function Page({ params }: { params: Promise<{ courseId: string }> }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const type = searchParams.get("type");
+  const [isLock, setIsLock] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const { courseId } = use(params);
   const [courseInfo, setCourseInfo] = useState<ResponseData>({
@@ -30,7 +35,31 @@ export default function Page({ params }: { params: Promise<{ courseId: string }>
     summary: "",
     description: "",
   });
-  const type = searchParams.get("type");
+  const [answeredQuiz, setAnsweredQuiz] = useState<SolvedQuiz[]>([]);
+  const [quizData, setQuizData] = useState<QuizType[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleSelectAnswer = (index: number) => {
+    if (isLock) return;
+    setIsLock(true);
+    let newData: SolvedQuiz = {
+      quizId: currentIndex,
+      correctAnswer: quizData[currentIndex].correctAnswer,
+      selectedAnswer: index,
+      reason: "",
+      isAnswered: true,
+      attempts: 1,
+    };
+    setAnsweredQuiz([...answeredQuiz, newData]);
+
+    setTimeout(() => {
+      if (currentIndex == 2) {
+        router.push(`/quiz/${courseId}`);
+      } else {
+        setCurrentIndex(currentIndex + 1);
+      }
+    }, 2000);
+  };
 
   const getCourseInfo = useCallback(async () => {
     try {
@@ -38,6 +67,10 @@ export default function Page({ params }: { params: Promise<{ courseId: string }>
         courseId: courseId,
       });
       setCourseInfo(response);
+      const { data: responseQuiz } = await api.post<QuizType[]>("/course/quiz", {
+        courseId: courseId,
+      });
+      setQuizData(responseQuiz);
     } catch (ex) {
       console.log(ex);
     }
@@ -46,6 +79,10 @@ export default function Page({ params }: { params: Promise<{ courseId: string }>
   useEffect(() => {
     getCourseInfo();
   }, []);
+
+  useEffect(() => {
+    setIsLock(false);
+  }, [currentIndex]);
 
   return (
     <div className="h-full w-full overflow-hidden">
@@ -134,17 +171,97 @@ export default function Page({ params }: { params: Promise<{ courseId: string }>
                       {courseInfo.title}
                     </h1>
                     <div className="flex flex-col gap-4 justify-between">
-                      <div className="relative flex bg-white rounded-[8px] overflow-hidden w-full">
+                      <div className="relative flex bg-white rounded-[8px] overflow-hidden w-full shadow-xl">
                         <div className="absolute top-0 left-0 h-1 w-full rounded-[2px] bg-primary"></div>
                         <div className="p-6">
-                          <ReactMarkdown rehypePlugins={[rehypeRaw]}>{courseInfo.description}</ReactMarkdown>
+                          <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                            {courseInfo.description}
+                          </ReactMarkdown>
                         </div>
                       </div>
-                      <div className="h-1 w-full rounded-[2px] bg-primary"></div>
-                      <div className="relative flex bg-white rounded-[8px] overflow-hidden w-full">
-                        <div className="absolute top-0 left-0 h-1 w-full rounded-[2px] bg-primary"></div>
-                        <div className="p-6">content</div>
-                      </div>
+                      {quizData.length > 0 && (
+                        <>
+                          <div className="h-1 w-full rounded-[2px] bg-primary"></div>
+                          <div className="relative flex bg-white rounded-[8px] overflow-hidden w-full shadow-xl">
+                            <div className="absolute top-0 left-0 h-1 w-full rounded-[2px] bg-primary"></div>
+                            <AnimatePresence mode="wait">
+                              <motion.div
+                                className="w-full"
+                                key={currentIndex}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                transition={{ duration: 0.3 }}
+                              >
+                                <div className="p-6 w-full">
+                                  <div className="flex flex-col gap-2 justify-between mb-4">
+                                    <h4 className="text-primary font-bold text-[18px]">
+                                      {quizData[currentIndex].question}
+                                    </h4>
+                                    <p className="text-[14px] font-[500]">
+                                      Tap/click, or type A-E in the field below.
+                                    </p>
+                                  </div>
+                                  {/* <img
+                      src="/assets/images/quiz_question_1.png"
+                      alt=""
+                      className="border-[#DDDDDD] border-1 rounded-[16px] max-w-3xl self-center"
+                    /> */}
+                                  <div className="flex flex-col justify-between gap-2 w-full">
+                                    {quizData[currentIndex].answers.map(
+                                      (answer: string, index: number) => (
+                                        <div
+                                          key={index}
+                                          className={cn(
+                                            "cursor-pointer transition-all border-black hover:border-primary border-[1px] hover:bg-primary hover:text-white flex flex-row justify-between px-5 py-4 rounded-[12px]",
+                                            currentIndex < answeredQuiz.length &&
+                                              answeredQuiz[currentIndex].isAnswered &&
+                                              answeredQuiz[currentIndex].correctAnswer ==
+                                                index &&
+                                              "border-[#2ECC71] text-[#2ECC71]",
+                                            currentIndex < answeredQuiz.length &&
+                                              answeredQuiz[currentIndex].selectedAnswer ==
+                                                index &&
+                                              "bg-primary border-primary text-secondary",
+                                            currentIndex < answeredQuiz.length &&
+                                              answeredQuiz[currentIndex].isAnswered &&
+                                              answeredQuiz[currentIndex].selectedAnswer ==
+                                                index
+                                              ? answeredQuiz[currentIndex]
+                                                  .correctAnswer == index
+                                                ? "bg-[#2ECC71] border-[#2ECC71] text-secondary"
+                                                : "bg-primary border-primary text-secondary"
+                                              : ""
+                                          )}
+                                          onClick={() => handleSelectAnswer(index)}
+                                        >
+                                          <p>
+                                            {String.fromCharCode(index + 65)}.) {answer}.
+                                          </p>
+                                          {currentIndex < answeredQuiz.length &&
+                                          answeredQuiz[currentIndex].isAnswered ? (
+                                            answeredQuiz[currentIndex].correctAnswer ==
+                                            index ? (
+                                              <Check />
+                                            ) : answeredQuiz[currentIndex]
+                                                .selectedAnswer == index ? (
+                                              <CircleX />
+                                            ) : (
+                                              <Circle />
+                                            )
+                                          ) : (
+                                            <Circle />
+                                          )}
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                </div>
+                              </motion.div>
+                            </AnimatePresence>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </PerfectScrollbar>
