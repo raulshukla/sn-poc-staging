@@ -68,10 +68,10 @@ export default function Page({ params }: { params: Promise<{ courseId: string }>
         chapterId: 1
       });
       setCourseInfo(response);
-      // const { data: responseQuiz } = await api.post<QuizType[]>("/course/quiz", {
-      //   courseId: courseId,
-      // });
-      // setQuizData(responseQuiz);
+      const { data: responseQuiz } = await api.post<QuizType[]>("/course/quiz", {
+        courseId: courseId,
+      });
+      setQuizData(responseQuiz);
     } catch (ex) {
       console.log(ex);
     }
