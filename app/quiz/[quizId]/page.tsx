@@ -30,6 +30,7 @@ import { QuizType, ResponseData, ScoreType, SolvedQuiz } from "@/types/quiz";
 import ReactMarkDown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
 
 export default function Page({ params }: { params: Promise<{ quizId: string }> }) {
   const [answeredQuiz, setAnsweredQuiz] = useState<SolvedQuiz[]>([]);
@@ -53,7 +54,7 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
     try {
       const { data: response } = await api.post<ResponseData>("/quiz/get_quiz_by_id", {
         courseId: quizId,
-        chapterId: 1
+        chapterId: 1,
       });
       setQuizData(response.questions);
       setQuizTitle(response.title);
@@ -64,7 +65,7 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
 
   useEffect(() => {
     getQuiz();
-  }, []);
+  }, [getQuiz]);
 
   const handleNext = async () => {
     if (currentIndex == 14) {
@@ -114,7 +115,6 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
         console.log(ex);
         setIsSubmit(false);
         toast.error("Error on server");
-
       }
     }
   };
@@ -330,7 +330,9 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
                     <div className="bg-primary h-1 rounded-[2px] absolute top-0 left-0 w-full"></div>
                     <div className="flex flex-col gap-2 justify-between">
                       <h4 className="text-primary font-bold text-[18px]">
-                        {quizData[currentIndex].question}
+                        <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                          {quizData[currentIndex].question}
+                        </ReactMarkdown>
                       </h4>
                       <p className="text-[14px] font-[500]">
                         Tap/click, or type A-E in the field below.
