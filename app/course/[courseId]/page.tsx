@@ -65,12 +65,13 @@ export default function Page({ params }: { params: Promise<{ courseId: string }>
     try {
       const { data: response } = await api.post<ResponseData>("/course/", {
         courseId: courseId,
+        chapterId: 1
       });
       setCourseInfo(response);
-      const { data: responseQuiz } = await api.post<QuizType[]>("/course/quiz", {
-        courseId: courseId,
-      });
-      setQuizData(responseQuiz);
+      // const { data: responseQuiz } = await api.post<QuizType[]>("/course/quiz", {
+      //   courseId: courseId,
+      // });
+      // setQuizData(responseQuiz);
     } catch (ex) {
       console.log(ex);
     }
@@ -162,11 +163,17 @@ export default function Page({ params }: { params: Promise<{ courseId: string }>
               <div className={cn("flex-grow overflow-hidden", isOpen ? "h-0" : "h-full")}>
                 <PerfectScrollbar>
                   <div className="flex flex-col p-6 justify-start gap-8">
-                    <img
-                      src="/assets/images/leading_1.png"
-                      alt=""
-                      className="w-full object-cover rounded-[24px]"
-                    />
+                    <div className="h-96 relative rounded-[24px] overflow-hidden">
+                      <video
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        className="w-full object-cover rounded-[24px] -translate-y-80"
+                      >
+                        <source src="/assets/media/course_banner.mp4" type="video/mp4" />
+                      </video>
+                    </div>
                     <h1 className="text-primary text-[32px] font-bold">
                       {courseInfo.title}
                     </h1>

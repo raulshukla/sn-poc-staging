@@ -53,6 +53,7 @@ export default function Page({ params }: { params: Promise<{ quizId: string }> }
     try {
       const { data: response } = await api.post<ResponseData>("/quiz/get_quiz_by_id", {
         courseId: quizId,
+        chapterId: 1
       });
       setQuizData(response.questions);
       setQuizTitle(response.title);
