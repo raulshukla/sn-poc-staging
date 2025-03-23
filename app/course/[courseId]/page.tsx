@@ -281,12 +281,30 @@ export default function Page({ params }: { params: Promise<{ courseId: string }>
                   <PerfectScrollbar>
                     <div className="flex flex-col p-6 justify-start gap-8">
                       <div className="h-96 relative rounded-[24px] overflow-hidden">
+                        <div className="absolute bg-gradient-to-r from-red-500/70 via-red-500/5 to-transparent w-full h-full z-10"></div>
+                        <div className="absolute top-16 left-10 flex flex-col gap-8 z-20">
+                          <h1 className="text-3xl font-bold text-white">
+                            {courseId.toUpperCase()}
+                          </h1>
+                          <p className="line-clamp-3 w-48">{courseInfo.summary}</p>
+                          <div className="flex flex-row gap-4 justify-center items-center">
+                            <Button className="bg-white rounded-xl text-primary text-[14px] font-[500] h-[52px] hover:bg-red-100 px-8">
+                              Resume
+                            </Button>
+                            <Button
+                              variant="link"
+                              className="text-white text-[14px] font-[500]"
+                            >
+                              More Info
+                            </Button>
+                          </div>
+                        </div>
                         <video
                           autoPlay
                           muted
                           loop
                           playsInline
-                          className="w-full object-cover rounded-[24px] -translate-y-80"
+                          className="w-full object-cover h-full rounded-[24px]"
                         >
                           <source
                             src="/assets/media/course_banner.mp4"
@@ -386,7 +404,7 @@ export default function Page({ params }: { params: Promise<{ courseId: string }>
                                 Feedback
                               </h1>
                               <Button
-                                className="h-[44px] text-[12px] rounded-[8px] px-6 w-[140px]"
+                                className="h-[44px] rounded-[8px] px-6 w-[140px]"
                                 onClick={handleNextQuiz}
                               >
                                 Next
