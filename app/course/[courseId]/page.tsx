@@ -280,14 +280,14 @@ export default function Page({ params }: { params: Promise<{ courseId: string }>
                 ) : (
                   <PerfectScrollbar>
                     <div className="flex flex-col p-6 justify-start gap-8">
-                      <div className="h-96 relative rounded-[24px] overflow-hidden">
+                      <div className="h-96 flex flex-row items-center relative rounded-[24px] overflow-hidden">
                         <div className="absolute bg-gradient-to-r from-red-500/70 via-red-500/5 to-transparent w-full h-full z-10"></div>
-                        <div className="absolute top-16 left-10 flex flex-col gap-8 z-20">
-                          <h1 className="text-3xl font-bold text-white">
+                        <div className="ml-10 flex flex-col gap-2 z-20">
+                          <span className="text-3xl font-bold text-white ">
                             {courseId.toUpperCase()}
-                          </h1>
-                          <p className="line-clamp-3 w-48">{courseInfo.summary}</p>
-                          <div className="flex flex-row gap-4 justify-center items-center">
+                          </span>
+                          <p className="line-clamp-3 w-[70%] min-w-80 text-white font-[200] text-[14px] leading-6">{courseInfo.summary}</p>
+                          <div className="flex flex-row gap-4 justify-start items-center">
                             <Button className="bg-white rounded-xl text-primary text-[14px] font-[500] h-[52px] hover:bg-red-100 px-8">
                               Resume
                             </Button>
@@ -304,7 +304,7 @@ export default function Page({ params }: { params: Promise<{ courseId: string }>
                           muted
                           loop
                           playsInline
-                          className="w-full object-cover h-full rounded-[24px]"
+                          className="absolute top-0 left-0 w-full object-cover h-full rounded-[24px]"
                         >
                           <source
                             src="/assets/media/course_banner.mp4"
