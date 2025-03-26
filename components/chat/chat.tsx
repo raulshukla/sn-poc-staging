@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import Image from "next/Image";
+import Image from "next/image";
 import { Button } from "../ui/button";
 import { MessagesSquare, SendIcon, X } from "lucide-react";
 import { api } from "@/lib/api";
