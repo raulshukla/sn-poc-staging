@@ -286,7 +286,9 @@ export default function Page({ params }: { params: Promise<{ courseId: string }>
                           <span className="text-3xl font-bold text-white ">
                             {courseId.toUpperCase()}
                           </span>
-                          <p className="line-clamp-3 w-[70%] min-w-80 text-white font-[200] text-[14px] leading-6">{courseInfo.summary}</p>
+                          <p className="line-clamp-3 w-[70%] min-w-80 text-white font-[200] text-[14px] leading-6">
+                            {courseInfo.summary}
+                          </p>
                           <div className="flex flex-row gap-4 justify-start items-center">
                             <Button className="bg-white rounded-xl text-primary text-[14px] font-[500] h-[52px] hover:bg-red-100 px-8">
                               Resume
@@ -312,89 +314,90 @@ export default function Page({ params }: { params: Promise<{ courseId: string }>
                           />
                         </video>
                       </div>
-                      <h1 className="text-primary text-[32px] font-bold">
+                      {/* <h1 className="text-primary text-[32px] font-bold">
                         {courseInfo.title}
-                      </h1>
+                      </h1> */}
                       <div className="flex flex-col gap-4 justify-between">
-                        <div className="relative flex bg-white rounded-[8px] overflow-hidden w-full shadow-xl">
-                          <div className="absolute top-0 left-0 h-1 w-full rounded-[2px] bg-primary"></div>
-                          <div className="p-6">
+                        <div className="relative flex bg-white rounded-[8px] overflow-hidden w-full">
+                          {/* <div className="absolute top-0 left-0 h-1 w-full rounded-[2px] bg-primary"></div> */}
+                          <div>
                             <ReactMarkdown rehypePlugins={[rehypeRaw]}>
                               {courseInfo.description}
                             </ReactMarkdown>
                           </div>
                         </div>
                         {quizData.length > 0 && (
-                          <>
-                            <div className="h-1 w-full rounded-[2px] bg-primary"></div>
-                            <div className="relative flex bg-white rounded-[8px] overflow-hidden w-full shadow-xl">
-                              <div className="absolute top-0 left-0 h-1 w-full rounded-[2px] bg-primary"></div>
-                              <div className="p-6 w-full">
-                                <div className="flex flex-col gap-2 justify-between mb-4">
-                                  <h4 className="text-primary font-bold text-[18px]">
-                                    {quizData[currentIndex].question}
-                                  </h4>
-                                  <p className="text-[14px] font-[500]">
-                                    Tap/click, or type A-E in the field below.
-                                  </p>
-                                </div>
-                                <div className="flex flex-col justify-between gap-2 w-full">
-                                  {quizData[currentIndex].answers.map(
-                                    (answer: string, index: number) => (
-                                      <div
-                                        key={index}
-                                        className={cn(
-                                          "cursor-pointer transition-all border-black hover:border-primary border-[1px] hover:bg-primary hover:text-white flex flex-row justify-between px-5 py-4 rounded-[12px]",
-                                          answerIndex === index &&
-                                            (quizData[currentIndex].correctAnswer ===
-                                            answerIndex
-                                              ? "bg-[#2ECC71] border-[#2ECC71] text-secondary"
-                                              : "bg-primary border-primary text-secondary"),
-                                          answerIndex !== -1 &&
-                                            quizData[currentIndex].correctAnswer ===
-                                              index &&
-                                            "bg-[#2ECC71] border-[#2ECC71] text-secondary"
-                                        )}
-                                        onClick={() => {
-                                          if (answerIndex == -1)
-                                            handleSelectAnswer(index);
-                                        }}
-                                      >
-                                        <p>
-                                          {String.fromCharCode(index + 65)}.) {answer}.
-                                        </p>
-                                        {answerIndex === -1 ? (
-                                          <Circle />
-                                        ) : quizData[currentIndex].correctAnswer ===
-                                          index ? (
-                                          <Check />
-                                        ) : answerIndex == index ? (
-                                          <CircleX />
-                                        ) : (
-                                          <Circle />
-                                        )}
-                                      </div>
-                                    )
-                                  )}
-                                  {quizData[currentIndex].answers.length > 0 && (
+                          <div className="relative flex flex-col bg-white rounded-[8px] overflow-hidden w-full">
+                            <div className="flex justify-center items-center">
+                              <span className="bg-[#FEE3E2] rounded-[6px] px-3 py-1 text-primary">
+                                Quiz
+                              </span>
+                            </div>
+                            {/* <div className="absolute top-0 left-0 h-1 w-full rounded-[2px] bg-primary"></div> */}
+                            <div className="w-full">
+                              <div className="flex flex-col gap-2 justify-between mb-4">
+                                <h4 className="font-bold text-[32px]">
+                                  {quizData[currentIndex].question}
+                                </h4>
+                                <p className="text-[14px] font-[500] text-center">
+                                  (select one that apply)
+                                </p>
+                              </div>
+                              <div className="flex flex-col justify-between gap-2 w-full">
+                                {quizData[currentIndex].answers.map(
+                                  (answer: string, index: number) => (
                                     <div
+                                      key={index}
                                       className={cn(
                                         "cursor-pointer transition-all border-black hover:border-primary border-[1px] hover:bg-primary hover:text-white flex flex-row justify-between px-5 py-4 rounded-[12px]",
-                                        isNext &&
+                                        answerIndex === index &&
+                                          (quizData[currentIndex].correctAnswer ===
+                                          answerIndex
+                                            ? "bg-[#2ECC71] border-[#2ECC71] text-secondary"
+                                            : "bg-primary border-primary text-secondary"),
+                                        answerIndex !== -1 &&
+                                          quizData[currentIndex].correctAnswer ===
+                                            index &&
                                           "bg-[#2ECC71] border-[#2ECC71] text-secondary"
                                       )}
-                                      onClick={() => handleSelectAnswer(-1)}
+                                      onClick={() => {
+                                        if (answerIndex == -1) handleSelectAnswer(index);
+                                      }}
                                     >
                                       <p>
-                                        F.) Prefer not to answer. Move on to next content!
+                                        {String.fromCharCode(index + 65)}.) {answer}.
                                       </p>
-                                      {isNext ? <Check /> : <Circle />}
+                                      {answerIndex === -1 ? (
+                                        <Circle />
+                                      ) : quizData[currentIndex].correctAnswer ===
+                                        index ? (
+                                        <Check />
+                                      ) : answerIndex == index ? (
+                                        <CircleX />
+                                      ) : (
+                                        <Circle />
+                                      )}
                                     </div>
-                                  )}
-                                </div>
+                                  )
+                                )}
+                                {quizData[currentIndex].answers.length > 0 && (
+                                  <div
+                                    className={cn(
+                                      "cursor-pointer transition-all border-black hover:border-primary border-[1px] hover:bg-primary hover:text-white flex flex-row justify-between px-5 py-4 rounded-[12px]",
+                                      isNext &&
+                                        "bg-[#2ECC71] border-[#2ECC71] text-secondary"
+                                    )}
+                                    onClick={() => handleSelectAnswer(-1)}
+                                  >
+                                    <p>
+                                      F.) Prefer not to answer. Move on to next content!
+                                    </p>
+                                    {isNext ? <Check /> : <Circle />}
+                                  </div>
+                                )}
                               </div>
                             </div>
-                          </>
+                          </div>
                         )}
                         {feedback && (
                           <div className="relative flex flex-col bg-white rounded-[8px] overflow-hidden w-full shadow-xl">
