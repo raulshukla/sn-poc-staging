@@ -112,3 +112,13 @@ input[type="date"]::-webkit-date-and-time-value {
     @apply mt-4;
   }
 }
+
+@layer components {
+  .auth-container {
+    @apply flex justify-center items-center min-h-screen bg-gray-100 px-4;
+  }
+
+  .auth-card {
+    @apply max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center;
+  }
+}
